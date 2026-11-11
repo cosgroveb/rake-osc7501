@@ -21,10 +21,13 @@ class RakeSuite
               'TERM' => nil }.merge(environment)
       command = [RbConfig.ruby, '-I', File.expand_path('../../lib', __dir__), '-S', 'rake', *arguments]
       output, error, status = tty ? capture_tty(env, command, directory) : capture(env, command, directory)
-      results = Dir[File.join(directory, '*.out')].each_with_object({}) { |path, result| result[File.basename(path)] = File.read(path) }
+      results = Dir[File.join(directory, '*.out')].each_with_object({}) do |path, result|
+        result[File.basename(path)] = File.read(path)
+      end
       [output, error, status, results]
     end
   end
+
   #: (Hash[String, String?], Array[String], String) -> [String, String, Process::Status]
   def self.capture(environment, command, directory)
     Open3.popen3(environment, *command, chdir: directory, pgroup: true) do |input, output, error, waiter|
@@ -32,6 +35,7 @@ class RakeSuite
       readers = [output, error].map { |stream| Thread.new { stream.read } }
       begin
         raise 'Rake subprocess timeout' unless waiter.join(15)
+
         [readers[0].value, readers[1].value, waiter.value]
       ensure
         unless waiter.join(0)

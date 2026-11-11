@@ -13,10 +13,10 @@ module Rake
     def self.install!(application = Rake.application)
       application.extend(ApplicationHook) unless application.is_a?(ApplicationHook)
       Rake::Task.prepend(TaskHook) unless Rake::Task.ancestors.include?(TaskHook)
-      if defined?(RSpec::Core::RakeTask)
-        require_relative 'osc7501/rspec_task'
-        RSpec::Core::RakeTask.prepend(RSpecTask) unless RSpec::Core::RakeTask.ancestors.include?(RSpecTask)
-      end
+      return unless defined?(RSpec::Core::RakeTask)
+
+      require_relative 'osc7501/rspec_task'
+      RSpec::Core::RakeTask.prepend(RSpecTask) unless RSpec::Core::RakeTask.ancestors.include?(RSpecTask)
     end
   end
 end

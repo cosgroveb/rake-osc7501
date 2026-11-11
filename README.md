@@ -21,8 +21,15 @@ Rake-only projects need no RSpec dependencies.
 
 ## RSpec tasks
 
-Add `rspec-osc7501` with its managed entrypoint, then load the standard RSpec task
-class before this integration:
+RubyGems release `rspec-osc7501` 0.1.3 does not include the managed entrypoint.
+Until a gem release includes it, pin the reviewed companion commit in your Gemfile:
+
+```ruby
+gem 'rspec-osc7501', git: 'https://github.com/cosgroveb/rspec-osc7501.git',
+                     ref: '098bb55433dd05265910995b2c349e4db99869bb'
+```
+
+Run `bundle install`, then load the standard RSpec task class before this integration:
 
 ```ruby
 require 'rspec/core/rake_task'
@@ -98,7 +105,7 @@ On modern Ruby:
 
 ```sh
 bundle install
-bundle exec rake spec types package
+bundle exec rake
 RSPEC_OSC7501_PATH=../rspec-osc7501 BUNDLE_GEMFILE=Gemfile.integration bundle install
 BUNDLE_GEMFILE=Gemfile.integration bundle exec rake spec
 bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
@@ -106,7 +113,8 @@ bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
 
 `rake types` checks method annotation coverage across authored Ruby files,
 generates inline RBS with pinned development tools, and validates signatures.
-Generated signatures stay in ignored `tmp/`. This check validates declarations,
+Generated signatures stay in ignored `tmp/`. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for lint, dependency audit, workflow checks and release setup. This check validates declarations,
 not implementation type consistency. Compatibility checks use `Gemfile.compat`
 without type tooling. Pass an RSpec gem package as the smoke script's second
 argument to check installed parent/child reporting.

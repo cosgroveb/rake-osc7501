@@ -4,42 +4,128 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
+    inputs:
+      release-artifact:
+        description: Prepared release bundle from the calling workflow
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ inputs.release-artifact == '' }}
+
 jobs:
   test:
-    runs-on: ubuntu-22.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         include:
-          - ruby: '2.1'
+          - os: ubuntu-latest
+            ruby: "3.3"
+            rspec_minor: "3.12"
+            rspec_core: "3.12.0"
+          - os: ubuntu-latest
+            ruby: "3.3"
+            rspec_minor: "3.13"
+            rspec_core: "~> 3.13.0"
+          - os: ubuntu-latest
+            ruby: "3.4"
+            rspec_minor: "3.13"
+            rspec_core: "~> 3.13.0"
+          - os: ubuntu-latest
+            ruby: "4.0"
+            rspec_minor: "3.13"
+            rspec_core: "~> 3.13.0"
+          - os: ubuntu-latest
+            ruby: "4.0"
+            rspec_minor: "4.0"
+            rspec_core: "4.0.0.beta1"
+            rspec_version: "4.0.0.beta1"
+          - os: macos-latest
+            ruby: "3.4"
+            rspec_minor: "3.13"
+            rspec_core: "~> 3.13.0"
+          - os: ubuntu-22.04
+            ruby: "2.1"
+            rspec_minor: "3.6"
+            rspec_core: "3.6.0"
             gemfile: Gemfile.compat
-            bundler: '1.17.3'
-          - ruby: '3.4'
-            gemfile: Gemfile
-            bundler: default
-          - ruby: '4.0'
-            gemfile: Gemfile
-            bundler: default
+            bundler: "1.17.3"
+          - os: ubuntu-22.04
+            ruby: "2.1"
+            rspec_minor: "3.13"
+            rspec_core: "~> 3.13.0"
+            gemfile: Gemfile.compat
+            bundler: "1.17.3"
+          - os: ubuntu-22.04
+            ruby: "2.7"
+            rspec_minor: "3.9"
+            rspec_core: "~> 3.9.0"
+            gemfile: Gemfile.compat
+            bundler: "2.4.22"
+          - os: ubuntu-22.04
+            ruby: "3.1"
+            rspec_minor: "3.12"
+            rspec_core: "3.12.0"
+            gemfile: Gemfile.compat
+            bundler: "2.4.22"
+          - os: ubuntu-22.04
+            ruby: "3.4"
+            rspec_minor: "3.6"
+            rspec_core: "3.6.0"
+            gemfile: Gemfile.compat
+            bundler: "2.6.9"
+    runs-on: ${{ matrix.os }}
     env:
-      BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
+      BUNDLE_GEMFILE: ${{ matrix.gemfile || 'Gemfile' }}
+      RSPEC_MINOR: ${{ matrix.rspec_minor }}
+      RSPEC_CORE_VERSION: ${{ matrix.rspec_core }}
+      RSPEC_VERSION: ${{ matrix.rspec_version || format('~> {0}.0', matrix.rspec_minor) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: inputs.release-artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.release-artifact }}
+          path: ${{ runner.temp }}/release
+      - if: inputs.release-artifact != ''
+        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        with:
+          ruby-version: "3.4"
+          bundler: none
+          bundler-cache: false
+      - if: inputs.release-artifact != ''
+        run: ruby script/release.rb restore "$RUNNER_TEMP/release"
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler: ${{ matrix.bundler }}
+          bundler: ${{ matrix.bundler || 'default' }}
           bundler-cache: true
-      - run: bundle exec rake spec package
-      - run: bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
-      - if: matrix.ruby == '3.4'
-        run: bundle exec rake types
+          cache-version: ${{ matrix.ruby }}-${{ matrix.gemfile || 'Gemfile' }}-${{ matrix.rspec_minor }}-${{ matrix.rspec_core }}
+      - name: Install actionlint
+        if: matrix.os == 'ubuntu-latest' && matrix.ruby == '3.4'
+        run: |
+          GOBIN="$RUNNER_TEMP/bin" go install github.com/rhysd/actionlint/cmd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Check code quality
+        if: matrix.os == 'ubuntu-latest' && matrix.ruby == '3.4'
+        run: bundle exec rake quality
+      - if: matrix.gemfile != 'Gemfile.compat'
+        run: bundle exec rake spec smoke rdoc
+      - name: Check runtime compatibility
+        if: matrix.gemfile == 'Gemfile.compat'
+        run: |
+          bundle exec rspec spec/rake
+          bundle exec gem build rake-osc7501.gemspec
+          bundle exec ruby script/smoke.rb rake-osc7501-*.gem
 
   integration:
     runs-on: ubuntu-22.04
@@ -64,14 +150,29 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: cosgroveb/rspec-osc7501
+          ref: ${{ vars.RSPEC_OSC7501_REF || 'main' }}
           path: tmp/rspec-osc7501
           persist-credentials: false
+      - if: inputs.release-artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.release-artifact }}
+          path: ${{ runner.temp }}/release
+      - if: inputs.release-artifact != ''
+        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        with:
+          ruby-version: "3.4"
+          bundler: none
+          bundler-cache: false
+      - if: inputs.release-artifact != ''
+        run: ruby script/release.rb restore "$RUNNER_TEMP/release"
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: ${{ matrix.bundler }}
           bundler-cache: true
-      - run: bundle exec rake spec package
+      - run: bundle exec rspec spec/rake
+      - run: bundle exec rake package
       - run: |
           cd tmp/rspec-osc7501
           bundle exec gem build rspec-osc7501.gemspec

@@ -53,7 +53,8 @@ RSpec.describe 'Rake reporting' do
     end
   end
 
-  { 'raise "bad"' => ['error', 1], 'exit 7' => ['error', 7], 'exit 0' => ['idle', 0], 'raise Interrupt' => ['idle', 1] }.each do |body, result|
+  { 'raise "bad"' => ['error', 1], 'exit 7' => ['error', 7], 'exit 0' => ['idle', 0],
+    'raise Interrupt' => ['idle', 1] }.each do |body, result|
     it "preserves task outcome #{body}" do
       source = "require 'rake/osc7501'; task(:default) { #{body} }"
       output, _, status = RakeSuite.run(source)
@@ -89,7 +90,8 @@ RSpec.describe 'Rake reporting' do
 
   %w[auto off].each do |mode|
     it "silences non-TTY #{mode} output" do
-      output, error, status = RakeSuite.run("require 'rake/osc7501'; task(:default) { puts 'OK' }", [], 'RAKE_OSC7501' => mode)
+      output, error, status = RakeSuite.run("require 'rake/osc7501'; task(:default) { puts 'OK' }", [],
+                                            'RAKE_OSC7501' => mode)
       expect(status.success?).to eq(true), error
       expect(output).to eq("OK\n")
     end

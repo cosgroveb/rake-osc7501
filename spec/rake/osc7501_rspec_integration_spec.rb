@@ -14,7 +14,8 @@ RSpec.describe 'managed RSpec tasks' do
   let(:setup) { "require 'rspec/core/rake_task'\nrequire 'rake/osc7501'\n" }
 
   it 'adds exactly one child while retaining ordinary progress' do
-    output, error, status = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], {}, 'spec/sample_spec.rb' => passing)
+    output, error, status = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], {},
+                                          'spec/sample_spec.rb' => passing)
     expect(status.success?).to eq(true), error
     expect(output).to include('1 example, 0 failures')
     records = frames(output)
@@ -25,10 +26,11 @@ RSpec.describe 'managed RSpec tasks' do
     expect(records.map { |r| r['state'] }).not_to include('clear')
   end
 
-  ['--require rspec/osc7501 --format RSpec::OSC7501::Formatter --format progress', '--format documentation', '--format json --out result.out'].each do |options|
+  ['--require rspec/osc7501 --format RSpec::OSC7501::Formatter --format progress', '--format documentation',
+   '--format json --out result.out'].each do |options|
     it "preserves formatter selection #{options}" do
       output, error, status, files = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], {},
-                                                 'spec/sample_spec.rb' => passing, '.rspec' => options)
+                                                   'spec/sample_spec.rb' => passing, '.rspec' => options)
       expect(status.success?).to eq(true), error
       expect(frames(output).count { |r| r['app'] == 'rspec' && r['state'] == 'done' }).to eq(1)
       expect(JSON.parse(files['result.out'])['summary']['failure_count']).to eq(0) if files['result.out']
@@ -37,8 +39,8 @@ RSpec.describe 'managed RSpec tasks' do
 
   it 'preserves explicit OSC file destinations' do
     output, error, status, files = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], {},
-                                               'spec/sample_spec.rb' => passing,
-                                               '.rspec' => '--require rspec/osc7501 --format RSpec::OSC7501::Formatter --out child.out --format progress')
+                                                 'spec/sample_spec.rb' => passing,
+                                                 '.rspec' => '--require rspec/osc7501 --format RSpec::OSC7501::Formatter --out child.out --format progress')
     expect(status.success?).to eq(true), error
     expect(frames(output).map { |r| r['app'] }.uniq).to eq(['rake'])
     expect(frames(files['child.out']).last['state']).to eq('done')
@@ -94,7 +96,8 @@ RSpec.describe 'managed RSpec tasks' do
 
   it 'retains a failing child when fail_on_error is false' do
     source = setup + 'RSpec::Core::RakeTask.new(:default) { |t| t.fail_on_error = false }'
-    output, error, status = RakeSuite.run(source, [], {}, 'spec/sample_spec.rb' => 'RSpec.describe("bad") { it { fail "bad" } }')
+    output, error, status = RakeSuite.run(source, [], {},
+                                          'spec/sample_spec.rb' => 'RSpec.describe("bad") { it { fail "bad" } }')
     expect(status.success?).to eq(true), error
     expect(frames(output).select { |r| r['app'] == 'rspec' }.last['state']).to eq('error')
     expect(frames(output).last['state']).to eq('done')
@@ -102,7 +105,8 @@ RSpec.describe 'managed RSpec tasks' do
 
   { 'before callbacks' => ['exit! 7', nil],
     'SIGINT termination' => ["Signal.trap('INT', 'DEFAULT'); Process.kill('INT', Process.pid)", nil],
-    'after successful summary' => ['at_exit { exit 7 }; RSpec.describe("ok") { it {} }', 'done'] }.each do |label, fixture|
+    'after successful summary' => ['at_exit { exit 7 }; RSpec.describe("ok") { it {} }',
+                                   'done'] }.each do |label, fixture|
     it "preserves independent process failure #{label}" do
       source = setup + 'RSpec::Core::RakeTask.new(:default)'
       files = { 'spec/sample_spec.rb' => fixture.first }
@@ -165,7 +169,8 @@ RSpec.describe 'managed RSpec tasks' do
 
   %w[RAKE_OSC7501 RSPEC_OSC7501].each do |control|
     it "honors #{control}=off" do
-      output, error, status = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], { control => 'off' }, 'spec/sample_spec.rb' => passing)
+      output, error, status = RakeSuite.run(setup + 'RSpec::Core::RakeTask.new(:default)', [], { control => 'off' },
+                                            'spec/sample_spec.rb' => passing)
       expect(status.success?).to eq(true), error
       expect(frames(output).select { |r| r['app'] == 'rspec' }).to be_empty
     end

@@ -1,0 +1,28 @@
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.3
+
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true
+
+# Runtime targets Ruby 2.1, below RuboCop's supported targets.
+Gemspec/RequiredRubyVersion:
+  Exclude:
+    - rake-osc7501.gemspec
+
+Naming/FileName:
+  Exclude:
+    - Gemfile.compat
+    - Gemfile.integration
+
+# Ruby 2.1 does not load thread automatically.
+Lint/RedundantRequireStatement:
+  Exclude:
+    - lib/rake/osc7501/run.rb
+
+# Runtime reporting must record Interrupt/SystemExit before reraising them.
+Lint/RescueException:
+  Exclude:
+    - lib/rake/osc7501/run.rb

@@ -37,25 +37,34 @@ module Rake
         result = yield
         finish('done', 'Completed')
         result
-      rescue Exception => error # Preserve Rake's handling of Interrupt and SystemExit.
-        stopped = error.is_a?(Interrupt) || (error.is_a?(SystemExit) && error.success?)
+      rescue Exception => e # Preserve Rake's handling of Interrupt and SystemExit.
+        stopped = e.is_a?(Interrupt) || (e.is_a?(SystemExit) && e.success?)
         finish(stopped ? 'idle' : 'error', stopped ? 'Stopped' : 'Failed')
         raise
       end
 
       #: [T] (_TaskName) { () -> T } -> T
       def during_task(task)
-        @mutex.synchronize { @active << task; report_active }
+        @mutex.synchronize do
+          @active << task
+          report_active
+        end
         begin
           yield
         ensure
-          @mutex.synchronize { @active.delete_at(@active.rindex(task)); report_active }
+          @mutex.synchronize do
+            @active.delete_at(@active.rindex(task))
+            report_active
+          end
         end
       end
 
       #: () -> String
       def next_child_id
-        @mutex.synchronize { @counter += 1; "#{@id}/rspec-#{@counter}" }
+        @mutex.synchronize do
+          @counter += 1
+          "#{@id}/rspec-#{@counter}"
+        end
       end
 
       #: () -> bool

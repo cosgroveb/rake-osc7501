@@ -21,17 +21,27 @@ RSpec.describe Rake::OSC7501::Run do
 
   [RuntimeError.new('bad'), SystemExit.new(7), Interrupt.new, SystemExit.new(0)].each do |error|
     it "preserves #{error.inspect} and reports its outcome" do
-      expect { run.during_run { run.during_task(task) { raise error } } }.to raise_error { |actual| expect(actual).to equal(error) }
+      expect { run.during_run { run.during_task(task) { raise error } } }.to(raise_error do |actual|
+        expect(actual).to equal(error)
+      end)
       expected = error.is_a?(Interrupt) || (error.is_a?(SystemExit) && error.success?) ? 'idle' : 'error'
       expect(frames(output.string).last['state']).to eq(expected)
     end
   end
 
   it 'synchronizes parallel active tasks and unique child identifiers' do
-    started, release, ids = Queue.new, Queue.new, Queue.new
+    started = Queue.new
+    release = Queue.new
+    ids = Queue.new
     run.during_run do
       workers = 2.times.map do
-        Thread.new { run.during_task(task) { ids << run.next_child_id; started << true; release.pop } }
+        Thread.new do
+          run.during_task(task) do
+            ids << run.next_child_id
+            started << true
+            release.pop
+          end
+        end
       end
       2.times { started.pop }
       2.times { release << true }
@@ -44,12 +54,18 @@ RSpec.describe Rake::OSC7501::Run do
   end
 
   it 'does not overwrite the final outcome when another task unwinds later' do
-    entered, release = Queue.new, Queue.new
+    entered = Queue.new
+    release = Queue.new
     worker = nil
     begin
       expect do
         run.during_run do
-          worker = Thread.new { run.during_task(task) { entered << true; release.pop } }
+          worker = Thread.new do
+            run.during_task(task) do
+              entered << true
+              release.pop
+            end
+          end
           entered.pop
           raise 'failed task'
         end

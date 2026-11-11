@@ -74,9 +74,15 @@ class InstalledSmoke
     end
     expected = failing ? 'error' : 'done'
     raise "Wrong process outcome: #{output}\n#{error}" unless status.exitstatus == (failing ? 1 : 0)
-    records = output.scan(/\e\]7501;([^\e]*)\e\\/).map { |(body)| body.split(':').map { |field| field.split('=', 2) }.to_h }
+
+    records = output.scan(/\e\]7501;([^\e]*)\e\\/).map do |(body)|
+      body.split(':').map do |field|
+        field.split('=', 2)
+      end.to_h
+    end
     raise 'Wrong parent outcome' unless records.last['app'] == 'rake' && records.last['state'] == expected
     raise 'Unexpected record cleanup' if records.any? { |record| record['state'] == 'clear' }
+
     ordinary = paired ? '1 example' : 'ordinary output'
     raise 'Ordinary output missing' unless output.include?(ordinary)
     return unless paired

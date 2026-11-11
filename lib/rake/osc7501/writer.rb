@@ -10,7 +10,7 @@ module Rake
       #: (String?) -> bool
       def self.valid_id?(id)
         id.is_a?(String) && id.ascii_only? && id.bytesize <= 128 &&
-          !!(id =~ /\A[A-Za-z0-9_.+-]{1,32}(?:\/[A-Za-z0-9_.+-]{1,32}){0,7}\z/)
+          !!(id =~ %r{\A[A-Za-z0-9_.+-]{1,32}(?:/[A-Za-z0-9_.+-]{1,32}){0,7}\z})
       end
 
       #: (IO | StringIO output, mode: String, id: String) -> void
@@ -21,7 +21,6 @@ module Rake
         @id = id
         @enabled = self.class.valid_id?(id) &&
                    (mode == 'force' || (mode == 'auto' && automatic_output?))
-
       rescue IOError, SystemCallError
         @enabled = false
       end

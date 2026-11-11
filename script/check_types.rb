@@ -6,7 +6,9 @@ require 'rbs'
 require 'fileutils'
 require 'rbconfig'
 
-files = Dir['{lib,spec,script}/**/*.rb'] + Dir['Gemfile*'].reject { |f| f.end_with?('.lock') } + %w[Rakefile rake-osc7501.gemspec]
+files = Dir['{lib,spec,script}/**/*.rb'] + Dir['Gemfile*'].reject do |f|
+  f.end_with?('.lock')
+end + %w[Rakefile rake-osc7501.gemspec]
 methods = 0
 files.each do |path|
   source = File.read(path)
