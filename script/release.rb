@@ -252,17 +252,21 @@ class Release
 
     #: (Hash[String, String | bool], String, String) -> bool
     def matching_release?(release, tag, notes_file)
-      expected = { 'tag_name' => tag, 'draft' => false, 'prerelease' => false,
-                   'target_commitish' => git('rev-parse', "#{tag}^{commit}") }
+      expected = { 'tag_name' => tag, 'draft' => false, 'prerelease' => false }
       expected.all? { |key, value| release.fetch(key) == value } &&
+        remote_tag(tag) == git('rev-parse', "#{tag}^{commit}") &&
         release.fetch('body').to_s.strip == File.read(notes_file).strip
     end
 
     #: (String, String, String) -> String
     def create_release(version, tag, notes_file)
       validate_version(version)
+      unless remote_tag(tag) == git('rev-parse', "#{tag}^{commit}")
+        raise Error, 'Remote release tag differs from local source'
+      end
+
       run('gh', 'release', 'create', tag, '--repo', REPOSITORY, '--verify-tag', '--title', "v#{version}",
-          '--target', git('rev-parse', "#{tag}^{commit}"), '--notes-file', File.expand_path(notes_file))
+          '--notes-file', File.expand_path(notes_file))
     end
 
     #: (String, String) -> void
