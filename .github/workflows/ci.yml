@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ruby: '2.1'
+            gemfile: Gemfile.compat
+            bundler: '1.17.3'
+          - ruby: '3.4'
+            gemfile: Gemfile
+            bundler: default
+          - ruby: '4.0'
+            gemfile: Gemfile
+            bundler: default
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: ${{ matrix.bundler }}
+          bundler-cache: true
+      - run: bundle exec rake spec package
+      - run: bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
+      - if: matrix.ruby == '3.4'
+        run: bundle exec rake types
+
+  integration:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ruby: '2.1'
+            gemfile: Gemfile.compat
+            bundler: '1.17.3'
+          - ruby: '3.4'
+            gemfile: Gemfile.integration
+            bundler: default
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
+      RSPEC_OSC7501_PATH: ${{ github.workspace }}/tmp/rspec-osc7501
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: cosgroveb/rspec-osc7501
+          path: tmp/rspec-osc7501
+          persist-credentials: false
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: ${{ matrix.bundler }}
+          bundler-cache: true
+      - run: bundle exec rake spec package
+      - run: |
+          cd tmp/rspec-osc7501
+          bundle exec gem build rspec-osc7501.gemspec
+      - run: bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem tmp/rspec-osc7501/rspec-osc7501-*.gem
