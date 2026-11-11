@@ -373,7 +373,10 @@ RSpec.describe Release, :aggregate_failures do
         'body' => File.read(notes_file), 'draft' => false, 'prerelease' => false }
     end
 
-    before { state }
+    before do
+      state
+      release.promote(artifacts)
+    end
 
     it 'reports an absent release' do
       allow(release).to receive(:github_release).and_return(nil)
@@ -383,6 +386,27 @@ RSpec.describe Release, :aggregate_failures do
     it 'accepts matching notes and target' do
       allow(release).to receive(:github_release).and_return(existing)
       expect(release.check_release('0.1.1', 'v0.1.1', notes_file)).to be(true)
+    end
+
+    it 'uses the existing tag when release metadata names a branch' do
+      existing['target_commitish'] = 'main'
+      allow(release).to receive(:github_release).and_return(existing)
+      expect(release.check_release('0.1.1', 'v0.1.1', notes_file)).to be(true)
+    end
+
+    it 'rejects a remote tag pointing to another commit' do
+      git('push', '--force', 'origin', 'v0.1.0:refs/tags/v0.1.1')
+      allow(release).to receive(:github_release).and_return(existing)
+      expect do
+        release.check_release('0.1.1', 'v0.1.1', notes_file)
+      end.to raise_error(Release::Error, /GitHub release differs/)
+    end
+
+    it 'refuses to create a release without its remote tag' do
+      git('push', 'origin', ':refs/tags/v0.1.1')
+      expect do
+        release.create_release('0.1.1', 'v0.1.1', notes_file)
+      end.to raise_error(Release::Error, /Remote release tag differs/)
     end
 
     it 'rejects conflicting notes' do
