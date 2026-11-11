@@ -2,4 +2,8 @@
 # rbs_inline: enabled
 
 eval_gemfile 'Gemfile'
-gem 'rspec-osc7501', path: ENV.fetch('RSPEC_OSC7501_PATH', '../rspec-osc7501')
+if ENV['RSPEC_OSC7501_PATH']
+  gem 'rspec-osc7501', path: ENV['RSPEC_OSC7501_PATH']
+else
+  gem 'rspec-osc7501', '>= 0.1.4'
+end

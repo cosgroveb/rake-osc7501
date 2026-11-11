@@ -142,28 +142,26 @@ jobs:
             bundler: default
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
-      RSPEC_OSC7501_PATH: ${{ github.workspace }}/tmp/rspec-osc7501
+      RSPEC_OSC7501_PATH: ${{ github.workspace }}/tmp/rspec-osc7501-0.1.4
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: cosgroveb/rspec-osc7501
-          ref: ${{ vars.RSPEC_OSC7501_REF || 'main' }}
-          path: tmp/rspec-osc7501
           persist-credentials: false
       - if: inputs.release-artifact != ''
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: ${{ inputs.release-artifact }}
           path: ${{ runner.temp }}/release
-      - if: inputs.release-artifact != ''
-        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
           ruby-version: "3.4"
           bundler: none
           bundler-cache: false
+      - name: Unpack released companion
+        run: |
+          curl --fail --silent --show-error https://rubygems.org/downloads/rspec-osc7501-0.1.4.gem -o "$RUNNER_TEMP/rspec-osc7501-0.1.4.gem"
+          gem unpack "$RUNNER_TEMP/rspec-osc7501-0.1.4.gem" --target "$GITHUB_WORKSPACE/tmp"
+          gem specification "$RUNNER_TEMP/rspec-osc7501-0.1.4.gem" --ruby > "$RSPEC_OSC7501_PATH/rspec-osc7501.gemspec"
       - if: inputs.release-artifact != ''
         run: ruby script/release.rb restore "$RUNNER_TEMP/release"
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
@@ -174,6 +172,4 @@ jobs:
       - run: bundle exec rspec spec/rake
       - run: bundle exec rake package
       - run: |
-          cd tmp/rspec-osc7501
-          bundle exec gem build rspec-osc7501.gemspec
-      - run: bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem tmp/rspec-osc7501/rspec-osc7501-*.gem
+          bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem "$RUNNER_TEMP/rspec-osc7501-0.1.4.gem"
