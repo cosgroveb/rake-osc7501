@@ -21,12 +21,10 @@ Rake-only projects need no RSpec dependencies.
 
 ## RSpec tasks
 
-RubyGems release `rspec-osc7501` 0.1.3 does not include the managed entrypoint.
-Until a gem release includes it, pin the reviewed companion commit in your Gemfile:
+Add `rspec-osc7501` 0.1.4 or newer for managed child reporting:
 
 ```ruby
-gem 'rspec-osc7501', git: 'https://github.com/cosgroveb/rspec-osc7501.git',
-                     ref: '098bb55433dd05265910995b2c349e4db99869bb'
+gem 'rspec-osc7501', '>= 0.1.4'
 ```
 
 Run `bundle install`, then load the standard RSpec task class before this integration:
@@ -99,17 +97,20 @@ Runtime targets MRI Ruby >= 2.1 and Rake >= 12.3.3. The optional adapter targets
 RSpec >= 3.6. The oldest paired check uses Ruby 2.1.10, Rake 12.3.3 and RSpec 3.6.0.
 Linux checks also cover Ruby 2.7, 3.1, 3.3, 3.4 and 4.0 with compatible RSpec
 versions, including RSpec 4.0.0.beta1 on Ruby 4.0. RSpec 3.6 has no
-clean-environment option. Other Ruby engines and macOS are unverified.
+clean-environment option. CI also checks macOS with Ruby 3.4.
+Other Ruby engines are unverified.
 
 On modern Ruby:
 
 ```sh
 bundle install
 bundle exec rake
-RSPEC_OSC7501_PATH=../rspec-osc7501 BUNDLE_GEMFILE=Gemfile.integration bundle install
+BUNDLE_GEMFILE=Gemfile.integration bundle install
 BUNDLE_GEMFILE=Gemfile.integration bundle exec rake spec
 bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
 ```
+
+Set `RSPEC_OSC7501_PATH` to test a local companion checkout instead of the released gem.
 
 `rake types` checks method annotation coverage across authored Ruby files,
 generates inline RBS with pinned development tools, and validates signatures.
