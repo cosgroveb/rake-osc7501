@@ -460,7 +460,7 @@ class Release
   #: (*String) -> String
   def run(*args)
     output, error, success = capture(*args)
-    raise Error, "#{args.first} failed: #{error.strip}" unless success
+    raise Error, "#{args.first} failed: #{[output, error].reject(&:empty?).join("\n").strip}" unless success
 
     output
   end
