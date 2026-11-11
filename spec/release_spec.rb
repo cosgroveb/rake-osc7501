@@ -74,6 +74,13 @@ RSpec.describe Release, :aggregate_failures do
     original_summary ? ENV['GITHUB_STEP_SUMMARY'] = original_summary : ENV.delete('GITHUB_STEP_SUMMARY')
   end
 
+  it 'reports stdout and stderr when a release command fails' do
+    command = 'puts "upload rejected"; warn "transport failed"; exit 1'
+    expect do
+      release.send(:run, RbConfig.ruby, '-e', command)
+    end.to raise_error(Release::Error, /upload rejected.*transport failed/m)
+  end
+
   context 'when preparing the first release' do
     let(:state) { release.prepare('0.1.0', artifacts) }
 
