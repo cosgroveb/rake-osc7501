@@ -15,8 +15,9 @@ task(:example) { sleep 5 }
 task default: :example
 ```
 
-Run `bundle exec rake`. A supporting terminal receives one named Rake record
-with task activity and the command's outcome. Ordinary command output continues.
+Run `bundle exec rake`. A supporting terminal receives the overall Rake run as
+its root record, with task activity and the command's outcome. Each new Rake
+run replaces that root record. Ordinary command output continues.
 Rake-only projects need no RSpec dependencies.
 
 ## RSpec tasks
@@ -39,7 +40,10 @@ task default: [:example, :spec]
 ```
 
 Existing and later-created standard tasks receive a unique child record for each
-invocation. Automatic selection preserves RSpec's default progress formatter and
+invocation. Child records keep their own identities, so each new Rake run
+replaces only the root record and previously finished children may remain until
+the terminal retires them.
+Automatic selection preserves RSpec's default progress formatter and
 configured formatters, including their output files. An explicit OSC formatter
 keeps its destination and receives no duplicate.
 

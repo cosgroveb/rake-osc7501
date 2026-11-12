@@ -8,13 +8,12 @@ RSpec.describe Rake::OSC7501::Run do
   let(:run) { described_class.new(output, mode: 'force') }
   let(:task) { Struct.new(:name).new('compile') }
 
-  it 'preserves results and reports a named indeterminate run' do
+  it 'preserves results and reports a root record without identity' do
     expect(run.during_run { run.during_task(task) { 42 } }).to eq(42)
     records = frames(output.string)
-    expect(records.map { |r| r['id'] }.uniq.size).to eq(1)
-    expect(records.first['id']).to match(/\Arake-\d+-[a-f0-9]+\z/)
     expect(records.map { |r| r['msg'] }).to include('compile')
     expect(records.last['state']).to eq('done')
+    expect(records).to all(satisfy { |r| !r.key?('id') })
     expect(records).to all(satisfy { |r| !r.key?('progress') })
     expect(output).not_to be_closed
   end
@@ -50,7 +49,23 @@ RSpec.describe Rake::OSC7501::Run do
     expect(frames(output.string).map { |r| r['msg'] }).to include('2 active tasks')
     children = 2.times.map { ids.pop }
     expect(children.uniq.size).to eq(2)
-    expect(children).to all(start_with(frames(output.string).first['id'] + '/rspec-'))
+    expect(children).to all(match(/\Arake-\d+-[a-f0-9]+\/rspec-\d+\z/))
+    prefixes = children.map { |id| id.split('/').first }.uniq
+    expect(prefixes.size).to eq(1)
+  end
+
+  it 'assigns distinct child prefixes across successive runs' do
+    second = described_class.new(output, mode: 'force')
+    prefixes = [run, second].map do |active|
+      active.next_child_id.split('/').first
+    end
+    expect(prefixes.uniq.size).to eq(2)
+    [run, second].each do |active|
+      active.during_run {}
+    end
+    records = frames(output.string)
+    expect(records.select { |r| r['state'] != 'working' }).to all(satisfy { |r| !r.key?('id') })
+    expect(records.select { |r| r['state'] != 'working' }.map { |r| r['state'] }).to eq(%w[done done])
   end
 
   it 'does not overwrite the final outcome when another task unwinds later' do

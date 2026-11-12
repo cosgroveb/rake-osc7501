@@ -21,7 +21,9 @@ RSpec.describe 'managed RSpec tasks' do
     records = frames(output)
     children = records.select { |r| r['app'] == 'rspec' }
     expect(children.map { |r| r['state'] }).to eq(%w[working done])
-    expect(children.map { |r| r['id'] }.uniq).to eq([records.first['id'] + '/rspec-1'])
+    expect(children.map { |r| r['id'] }.uniq.size).to eq(1)
+    expect(children.map { |r| r['id'] }.first).to match(/\Arake-\d+-[a-f0-9]+\/rspec-1\z/)
+    expect(records.select { |r| r['app'] == 'rake' }).to all(satisfy { |r| !r.key?('id') })
     expect(records.last['state']).to eq('done')
     expect(records.map { |r| r['state'] }).not_to include('clear')
   end
@@ -63,6 +65,8 @@ RSpec.describe 'managed RSpec tasks' do
     expect(status.success?).to eq(true), error
     ids = frames(output).select { |r| r['app'] == 'rspec' && r['state'] == 'done' }.map { |r| r['id'] }
     expect(ids.uniq.size).to eq(2)
+    expect(ids).to all(match(/\Arake-\d+-[a-f0-9]+\/rspec-\d+\z/))
+    expect(frames(output).select { |r| r['app'] == 'rake' }).to all(satisfy { |r| !r.key?('id') })
   end
 
   it 'assigns distinct child IDs to concurrent tasks' do
@@ -75,6 +79,7 @@ RSpec.describe 'managed RSpec tasks' do
     expect(status.success?).to eq(true), error
     ids = frames(output).select { |r| r['app'] == 'rspec' && r['state'] == 'done' }.map { |r| r['id'] }
     expect(ids.uniq.size).to eq(2)
+    expect(ids).to all(match(/\Arake-\d+-[a-f0-9]+\/rspec-\d+\z/))
   end
 
   it 'passes reporting controls through a clean child environment' do

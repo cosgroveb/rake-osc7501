@@ -62,6 +62,7 @@ RSpec.describe 'Rake reporting' do
       expect(status.exitstatus).to eq(baseline.exitstatus)
       expect(status.exitstatus).to eq(result.last)
       expect(frames(output).last['state']).to eq(result.first)
+      expect(frames(output)).to all(satisfy { |r| !r.key?('id') })
     end
   end
 

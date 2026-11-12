@@ -5,22 +5,14 @@ module Rake
   module OSC7501
     class Writer # :nodoc: all
       # @rbs @output: IO | StringIO
-      # @rbs @id: String
       # @rbs @enabled: bool
-      #: (String?) -> bool
-      def self.valid_id?(id)
-        id.is_a?(String) && id.ascii_only? && id.bytesize <= 128 &&
-          !!(id =~ %r{\A[A-Za-z0-9_.+-]{1,32}(?:/[A-Za-z0-9_.+-]{1,32}){0,7}\z})
-      end
 
-      #: (IO | StringIO output, mode: String, id: String) -> void
-      def initialize(output, mode:, id:)
+      #: (IO | StringIO output, mode: String) -> void
+      def initialize(output, mode:)
         raise ArgumentError, 'RAKE_OSC7501 must be auto, off, or force' unless %w[auto off force].include?(mode)
 
         @output = output
-        @id = id
-        @enabled = self.class.valid_id?(id) &&
-                   (mode == 'force' || (mode == 'auto' && automatic_output?))
+        @enabled = mode == 'force' || (mode == 'auto' && automatic_output?)
       rescue IOError, SystemCallError
         @enabled = false
       end
@@ -30,7 +22,6 @@ module Rake
         return unless @enabled
 
         fields = ['app=rake', 'title=UmFrZQ==', "state=#{state}", "msg=#{encode(msg, 2048)}"]
-        fields << "id=#{@id}" if @id
         @output.write("\e]7501;#{fields.join(':')}\e\\")
         @output.flush if @output.respond_to?(:flush)
       rescue IOError, SystemCallError
