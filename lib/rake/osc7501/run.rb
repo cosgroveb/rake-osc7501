@@ -24,7 +24,7 @@ module Rake
       def initialize(output, mode:)
         @mode = mode
         @id = "rake-#{Process.pid}-#{SecureRandom.hex(6)}"
-        @writer = Writer.new(output, mode: mode, id: @id)
+        @writer = Writer.new(output, mode: mode)
         @finished = false
         @active = []
         @counter = 0

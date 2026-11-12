@@ -84,6 +84,8 @@ class InstalledSmoke
       end.to_h
     end
     raise 'Wrong parent outcome' unless records.last['app'] == 'rake' && records.last['state'] == expected
+    raise 'Root record carries identity' unless records.select { |record| record['app'] == 'rake' }
+                                              .all? { |record| !record.key?('id') }
     raise 'Unexpected record cleanup' if records.any? { |record| record['state'] == 'clear' }
 
     ordinary = paired ? '1 example' : 'ordinary output'
@@ -92,7 +94,8 @@ class InstalledSmoke
 
     child = records.select { |record| record['app'] == 'rspec' }
     raise 'Missing child final' unless child.last && child.last['state'] == expected
-    raise 'Wrong child identity' unless child.all? { |record| record['id'] == records.first['id'] + '/rspec-1' }
+    raise 'Wrong child identity' unless child.all? { |record| record['id'] =~ /\Arake-\d+-[a-f0-9]+\/rspec-1\z/ }
+    raise 'Unstable child identity' unless child.map { |record| record['id'] }.uniq.size == 1
   end
 end
 

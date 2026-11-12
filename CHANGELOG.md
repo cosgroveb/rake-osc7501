@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Report the overall Rake run as the terminal's root record. Managed RSpec children keep their named child records
+
 ## 0.1.0 - 2026-11-11
 
 - Report Rake tasks and managed RSpec progress ([0245b76](https://github.com/cosgroveb/rake-osc7501/commit/0245b76c4f88f18b416e20fccc62f84cfa8b3239))
