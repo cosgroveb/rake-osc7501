@@ -7,7 +7,7 @@ require 'json'
 
 RSpec.describe 'managed RSpec tasks' do
   before do
-    skip 'run with Gemfile.integration or paired Gemfile.compat' unless Gem.loaded_specs.key?('rspec-osc7501')
+    skip 'rspec-osc7501 is not in this bundle' unless Gem.loaded_specs.key?('rspec-osc7501')
   end
 
   let(:passing) { 'RSpec.describe("sample") { it("passes") {} }' }
