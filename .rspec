@@ -1,0 +1,5 @@
+--format progress
+<% if Gem.loaded_specs.key?('rspec-osc7501') %>
+--require rspec/osc7501
+--format RSpec::OSC7501::Formatter
+<% end %>

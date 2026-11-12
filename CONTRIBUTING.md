@@ -60,7 +60,7 @@ export BUNDLE_GEMFILE=Gemfile.compat
 export RSPEC_MINOR=3.6
 export RSPEC_CORE_VERSION=3.6.0
 bundle install
-bundle exec rspec spec/rake
+bundle exec rspec --options '' spec/rake
 bundle exec gem build rake-osc7501.gemspec
 bundle exec ruby script/smoke.rb rake-osc7501-*.gem
 ```
