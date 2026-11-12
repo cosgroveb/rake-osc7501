@@ -10,7 +10,7 @@ Target MRI Ruby >= 2.1 and Rake >= 12.3.3. Runtime dependencies stay limited to 
 
 Run `bundle install`, then `bundle exec rake` for quality checks, specs,
 installed-gem smoke tests and RDoc. Compatibility jobs use `Gemfile.compat`
-and run `bundle exec rspec spec/rake`. The normal development bundle includes the
+and run `bundle exec rspec --options '' spec/rake`. The normal development bundle includes the
 released RSpec companion. Set `RSPEC_OSC7501_PATH` to test a local companion checkout.
 Keep the `pure-rake` CI job independent of RSpec and the development bundle.
 

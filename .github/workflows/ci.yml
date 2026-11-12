@@ -123,7 +123,8 @@ jobs:
       - name: Check runtime compatibility
         if: matrix.gemfile == 'Gemfile.compat'
         run: |
-          bundle exec rspec spec/rake
+          # RSpec 3.6 cannot parse option files with modern ERB.
+          bundle exec rspec --options '' spec/rake
           bundle exec gem build rake-osc7501.gemspec
           bundle exec ruby script/smoke.rb rake-osc7501-*.gem
 
