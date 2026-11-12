@@ -62,6 +62,9 @@ class InstalledSmoke
       source += 'RSpec::Core::RakeTask.new(:default)'
     else
       source += "abort 'RSpec loaded' unless $LOADED_FEATURES.grep(%r{/rspec/}).empty?\n"
+      unless @rspec_package
+        source += "abort 'RSpec installed' if Gem::Specification.any? { |spec| spec.name.start_with?('rspec') }\n"
+      end
       source += "task(:default) { puts 'ordinary output'; #{failing ? 'fail "expected failure"' : 'true'} }"
     end
     File.write(File.join(directory, 'Rakefile'), source)

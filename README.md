@@ -105,11 +105,12 @@ On modern Ruby:
 ```sh
 bundle install
 bundle exec rake
-BUNDLE_GEMFILE=Gemfile.integration bundle install
-BUNDLE_GEMFILE=Gemfile.integration bundle exec rake spec
-bundle exec ruby script/smoke.rb pkg/rake-osc7501-*.gem
+bundle exec rake spec
 ```
 
+The development bundle includes the RSpec companion, so the normal suite exercises
+both reporters. The `pure-rake` CI job checks passing and failing tasks with only
+Rake and the built gem installed in an isolated gem directory.
 Set `RSPEC_OSC7501_PATH` to test a local companion checkout instead of the released gem.
 
 `rake types` checks method annotation coverage across authored Ruby files,

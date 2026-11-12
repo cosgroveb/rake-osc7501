@@ -28,9 +28,10 @@ with `bundle exec rspec --seed <seed>` and narrow it with
 `bundle exec rspec --seed <seed> --bisect`. Generated subprocess fixtures keep a
 defined order because their interrupt and fail-fast cases depend on sequence.
 
-Keep runtime dependencies limited to `rake`. Cover task lifecycle behavior with real Rake subprocesses. Check paired RSpec
-reporting with `Gemfile.integration` and `RSPEC_OSC7501_PATH` pointing to a
-checkout that includes `rspec/osc7501/managed.rb`.
+Keep runtime dependencies limited to `rake`. Cover task lifecycle behavior with real Rake subprocesses.
+The normal development bundle includes `rspec-osc7501`, so `bundle exec rake spec`
+also checks paired reporting. Set `RSPEC_OSC7501_PATH` before `bundle install` to
+use a local companion checkout.
 
 Build the gem and documentation:
 
@@ -44,6 +45,8 @@ The package is `pkg/rake-osc7501-<version>.gem`. Open `tmp/rdoc/index.html` to c
 rendered documentation. Keep generated files out of commits.
 The smoke task builds and installs the gem in a temporary directory, then checks
 passing and failing tasks without loading the checkout's library.
+The `pure-rake` CI job runs this check with only Rake and the built gem installed
+in the isolated directory, and rejects any installed RSpec gems.
 
 ## Runtime compatibility
 

@@ -127,6 +127,31 @@ jobs:
           bundle exec gem build rake-osc7501.gemspec
           bundle exec ruby script/smoke.rb rake-osc7501-*.gem
 
+  pure-rake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: inputs.release-artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.release-artifact }}
+          path: ${{ runner.temp }}/release
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        with:
+          ruby-version: "3.4"
+          bundler: none
+          bundler-cache: false
+      - if: inputs.release-artifact != ''
+        run: ruby script/release.rb restore "$RUNNER_TEMP/release"
+      - run: gem install rake --no-document
+      - name: Check installed gem without RSpec
+        run: |
+          gem build rake-osc7501.gemspec --output "$RUNNER_TEMP/rake-osc7501.gem"
+          ruby -rrake script/smoke.rb "$RUNNER_TEMP/rake-osc7501.gem"
+
   integration:
     runs-on: ubuntu-22.04
     timeout-minutes: 15

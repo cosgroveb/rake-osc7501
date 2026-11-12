@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 # rbs_inline: enabled
 
+# Kept for existing development commands and release workflows.
 eval_gemfile 'Gemfile'
-if ENV['RSPEC_OSC7501_PATH']
-  gem 'rspec-osc7501', path: ENV['RSPEC_OSC7501_PATH']
-else
-  gem 'rspec-osc7501', '>= 0.1.4'
-end
