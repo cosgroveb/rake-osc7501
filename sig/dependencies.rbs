@@ -1,0 +1,87 @@
+# Dependency APIs used by the adapter that are absent from bundled RBS.
+module Rake
+  def self.application: () -> Application
+
+  class Application
+    include _Application
+  end
+
+  interface _Application
+    def options: () -> _Options
+    def top_level: () -> Object
+  end
+
+  interface _Options
+    def show_tasks: () -> (:tasks | :describe | :lines)?
+    def show_prereqs: () -> bool
+    def dryrun: () -> bool
+  end
+
+  class Task
+    def application: () -> Application
+    def name: () -> String
+    def execute: (?Object) ?{ (*Object) -> Object } -> Object
+  end
+end
+
+module RSpec
+  module Core
+    class RakeTask
+      DEFAULT_RSPEC_PATH: String
+      def run_task: (bool) -> Object
+      def ruby_opts: () -> (String | Array[String] | nil)
+      def rspec_path: () -> String
+      def system: (*String | Hash[String, String?] | Hash[Symbol, bool]) -> bool?
+    end
+  end
+end
+
+module Gem
+  class BasicSpecification
+    def full_gem_path: () -> String
+    def cache_file: () -> String
+  end
+  class Specification
+    def self.find_all_by_name: (String) -> Array[Specification]
+    def self.attribute_names: () -> Array[Symbol]
+    def bindir: () -> String
+    def name: () -> String
+  end
+
+  class Package
+    def initialize: (String) -> void
+    def verify: () -> bool
+    def spec: () -> Specification
+
+    class TarReader
+      include Enumerable[Entry]
+      def self.new: [T] (IO | StringIO | Zlib::GzipReader) { (TarReader) -> T } -> T
+      def each: () { (Entry) -> void } -> void
+
+      class Entry
+        def full_name: () -> String
+        def read: () -> String
+        def header: () -> TarHeader
+      end
+    end
+
+    class TarHeader
+      def typeflag: () -> String
+      def mode: () -> Integer
+      def linkname: () -> String
+    end
+  end
+end
+
+module Open3
+  def self.capture3: (*String, chdir: String) -> [String, String, Process::Status]
+                  | (Hash[String, String?], *String, chdir: String) -> [String, String, Process::Status]
+                  | ...
+end
+
+module Zlib
+  class GzipReader
+    def self.wrap: [T] (StringIO) { (GzipReader) -> T } -> T
+                 | ...
+  end
+end

@@ -53,7 +53,8 @@ module Rake
           yield
         ensure
           @mutex.synchronize do
-            @active.delete_at(@active.rindex(task))
+            index = @active.rindex(task) #: Integer
+            @active.delete_at(index)
             report_active
           end
         end

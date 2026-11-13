@@ -20,3 +20,4 @@ else
 end
 gem 'rubocop', '~> 1.92'
 gem 'rubocop-rspec', '~> 3.10'
+gem 'steep', '2.1.0', require: false
