@@ -22,7 +22,7 @@ ordinary command output continues.
 ## RSpec tasks
 
 For managed child reporting, add `rspec-osc7501` 0.1.4 or newer and use the
-standard RSpec task class. Either require order works:
+standard RSpec task class:
 
 ```ruby
 require 'rspec/core/rake_task'
