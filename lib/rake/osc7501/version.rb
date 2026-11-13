@@ -3,6 +3,6 @@
 
 module Rake
   module OSC7501
-    VERSION = '0.1.1' #: String
+    VERSION = '0.1.2' #: String
   end
 end

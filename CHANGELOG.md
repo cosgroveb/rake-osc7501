@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.1.2 - 2026-11-13
+
+- Enable OSC reporting for direct RSpec runs ([ac72e7d](https://github.com/cosgroveb/rake-osc7501/commit/ac72e7db42be722561b4673f3de3ecb1ef2f9422))
+- Check Ruby implementations against inline RBS ([4ec47b3](https://github.com/cosgroveb/rake-osc7501/commit/4ec47b379bc1396efaec97a5b824d9b4abb80277))
+- Package generated runtime RBS signatures ([ecfcad0](https://github.com/cosgroveb/rake-osc7501/commit/ecfcad06a510bde0d6fab00580a92f0a6f845701))
+- Build compatibility gems without type tooling ([784efd3](https://github.com/cosgroveb/rake-osc7501/commit/784efd35d2ba7e49bd3f12600196512f95fa0086))
+- Bump actions/download-artifact from 4.3.0 to 8.0.2 ([5b2445b](https://github.com/cosgroveb/rake-osc7501/commit/5b2445be7bcfa8d563efbd42b91e759d3e9eaf8c))
+- Bump actions/upload-artifact from 4.6.2 to 7.0.2 ([f4c30a5](https://github.com/cosgroveb/rake-osc7501/commit/f4c30a59b917398fe54e0d7a251d16081a8365bc))
+- Install RSpec reporting after loading the Rakefile ([c35a24a](https://github.com/cosgroveb/rake-osc7501/commit/c35a24a330fa0ef62d2d1224ca6be9dff6da4c27))
+
 ## 0.1.1 - 2026-11-12
 
 - Preserve release failure diagnostics on retries ([5e89c7b](https://github.com/cosgroveb/rake-osc7501/commit/5e89c7b0f84a9ed45342b4f5e5d8154f309f6b67))
