@@ -32,6 +32,7 @@ module Rake
       def top_level
         return super if options.show_tasks || options.show_prereqs || options.dryrun
 
+        OSC7501.install_rspec!
         previous = @osc7501_run
         begin
           run = Run.new($stdout, mode: ENV.fetch('RAKE_OSC7501', 'auto'))

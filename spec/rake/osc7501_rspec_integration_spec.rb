@@ -165,11 +165,14 @@ RSpec.describe 'managed RSpec tasks' do
     expect(frames(output).map { |r| r['app'] }.uniq).to eq(['rake'])
   end
 
-  it 'keeps reverse require order on generic Rake reporting' do
+  it 'reports a managed child with reverse require order' do
     source = "require 'rake/osc7501'; require 'rspec/core/rake_task'; RSpec::Core::RakeTask.new(:default)"
     output, error, status = RakeSuite.run(source, [], {}, 'spec/sample_spec.rb' => passing)
     expect(status.success?).to eq(true), error
-    expect(frames(output).map { |r| r['app'] }.uniq).to eq(['rake'])
+    expect(output).to include('1 example, 0 failures')
+    children = frames(output).select { |r| r['app'] == 'rspec' }
+    expect(children.map { |r| r['state'] }).to eq(%w[working done])
+    expect(children.map { |r| r['id'] }.uniq.size).to eq(1)
   end
 
   %w[RAKE_OSC7501 RSPEC_OSC7501].each do |control|
