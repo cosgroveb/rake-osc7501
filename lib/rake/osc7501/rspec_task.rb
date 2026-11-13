@@ -13,7 +13,7 @@ module Rake
     #     def system: (*String | Hash[String, String?] | Hash[Symbol, bool]) -> bool?
     #   end
 
-    # Wrap only the standard RSpec task's launch; keep its status handling intact.
+    # Wrap only the standard RSpec task's launch. Keep its status handling intact.
     # @rbs module-self _RSpecRakeTask
     module RSpecTask
       # @rbs @osc7501_context: [String, String]?
