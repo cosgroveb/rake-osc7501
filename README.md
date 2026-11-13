@@ -48,8 +48,9 @@ configured formatters, including their output files. An explicit OSC formatter
 keeps its destination and receives no duplicate.
 
 Missing or older `rspec-osc7501` installations without `rspec/osc7501/managed.rb`
-leave the original RSpec command intact. Custom runners and reverse require order
-receive generic Rake reporting. Direct `rspec` commands still need explicit OSC
+leave the original RSpec command intact. Either require order works when RSpec's
+Rake tasks are loaded before top-level execution. Custom runners receive generic
+Rake reporting. Direct `rspec` commands still need explicit OSC
 formatter selection.
 
 The adapter passes child context through the spawn environment. It preserves
