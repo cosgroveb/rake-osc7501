@@ -2,7 +2,13 @@
 # rbs_inline: enabled
 
 module Rake
+  # @rbs!
+  #   class Application
+  #     include OSC7501::ApplicationHook
+  #   end
+
   module OSC7501
+    # @rbs module-self ::Rake::_Application
     module ApplicationHook
       attr_reader :osc7501_run #: Run?
 
@@ -12,14 +18,16 @@ module Rake
 
         previous = @osc7501_run
         begin
-          @osc7501_run = Run.new($stdout, mode: ENV.fetch('RAKE_OSC7501', 'auto'))
-          @osc7501_run.during_run { super }
+          run = Run.new($stdout, mode: ENV.fetch('RAKE_OSC7501', 'auto'))
+          @osc7501_run = run
+          run.during_run { super }
         ensure
           @osc7501_run = previous
         end
       end
     end
 
+    # @rbs module-self ::Rake::Task
     module TaskHook
       #: (?Object args) ?{ (*Object) -> Object } -> Object
       def execute(args = nil, &block)

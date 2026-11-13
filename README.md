@@ -118,9 +118,11 @@ Rake and the built gem installed in an isolated gem directory.
 Set `RSPEC_OSC7501_PATH` to test a local companion checkout instead of the released gem.
 
 `rake types` checks method annotation coverage across authored Ruby files,
-generates inline RBS with pinned development tools, and validates signatures.
-Generated signatures stay in ignored `tmp/`. See [CONTRIBUTING.md](CONTRIBUTING.md)
-for lint, dependency audit, workflow checks and release setup. This check validates declarations,
-not implementation type consistency. Compatibility checks use `Gemfile.compat`
+generates inline RBS, and uses Steep to check implementations in `lib/` and
+`script/` against their signatures. Specs and build configuration receive
+annotation and signature validation, not implementation checking.
+Generated project signatures stay in ignored `tmp/`. `sig/dependencies.rbs`
+supplies missing dependency declarations. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for lint, dependency audit, workflow checks and release setup. Compatibility checks use `Gemfile.compat`
 without type tooling. Pass an RSpec gem package as the smoke script's second
 argument to check installed parent/child reporting.

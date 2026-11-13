@@ -15,12 +15,17 @@ class Release
   class Error < StandardError; end
   class DownloadNotVisible < Error; end
 
+  # @rbs!
+  #   type state = { "version" => String, "tag" => String, "captured_main" => String,
+  #                  "release_sha" => String, "retry" => bool }
+
   VERSION_FILE = 'lib/rake/osc7501/version.rb'
   REPOSITORY = 'cosgroveb/rake-osc7501'
 
   # Builds or recovers the exact source commit to validate.
   module Preparation
-    #: (String, String) -> Hash[String, String | bool]
+    # @type instance: Release
+    #: (String, String) -> state
     def prepare(version, directory)
       validate_version(version)
       raise Error, 'Working tree must be clean' unless git('status', '--porcelain').empty?
@@ -32,7 +37,7 @@ class Release
       state
     end
 
-    #: (String) -> Hash[String, String | bool]
+    #: (String) -> state
     def prepare_state(version)
       git('fetch', 'origin', 'main', '--tags')
       captured = git('rev-parse', 'origin/main')
@@ -103,7 +108,7 @@ class Release
 
     #: (String) -> String
     def commit_bullet(line)
-      hash, subject = line.chomp.split("\t", 2)
+      hash, subject = line.chomp.split("\t", 2) #: [String, String]
       escaped = subject.gsub(/([\\`*_{}\[\]()<>#])/) { |character| "\\#{character}" }
       "- #{escaped} ([#{hash[0, 7]}](https://github.com/#{REPOSITORY}/commit/#{hash}))"
     end
@@ -118,7 +123,7 @@ class Release
             "# Changelog\n\n## Unreleased\n\n## #{version} - #{Time.now.utc.to_date}\n\n#{notes}#{history}")
     end
 
-    #: (String, Hash[String, String | bool]) -> String
+    #: (String, state) -> String
     def save_bundle(directory, state)
       File.write(File.join(directory, 'state.json'), "#{JSON.pretty_generate(state)}\n")
       File.write(File.join(directory, 'notes.md'), release_notes(state.fetch('version')))
@@ -130,6 +135,7 @@ class Release
 
   # Checks published gem metadata and payload against the candidate.
   module Packages
+    # @type instance: Release
     #: (String, String) -> void
     def verify_gem(candidate, published)
       left = Gem::Package.new(candidate)
@@ -224,8 +230,9 @@ class Release
 
     #: (String) -> [Integer, String]
     def http_get(url)
-      uri = URI(url)
-      response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 15, read_timeout: 60) do |http|
+      uri = URI(url) #: URI::HTTPS
+      host = uri.host #: String
+      response = Net::HTTP.start(host, uri.port, use_ssl: true, open_timeout: 15, read_timeout: 60) do |http|
         http.get(uri.request_uri)
       end
       [response.code.to_i, response.body]
@@ -236,6 +243,7 @@ class Release
 
   # Publishes validated source and records partial publication outcomes.
   module Publication
+    # @type instance: Release
     #: (String, String, String) -> bool
     def check_release(version, tag, notes_file)
       validate_version(version)
@@ -283,7 +291,7 @@ class Release
       save_publication(directory, summary) if summary
     end
 
-    #: (Hash[String, String | bool], String, String) -> void
+    #: (state, String, String) -> void
     def verify_candidate(state, gem_path, notes_file)
       verify_source(state)
       spec = Gem::Package.new(gem_path).spec
@@ -294,7 +302,7 @@ class Release
             'Release notes artifact mismatch'
     end
 
-    #: (Hash[String, String | bool], String, String, Hash[String, String | bool]) -> void
+    #: (state, String, String, Hash[String, String | bool]) -> void
     def publication_status(state, gem_path, notes_file, summary)
       published = check_gem(gem_path)
       summary['rubygems'] = published ? 'published' : 'absent'
@@ -312,7 +320,7 @@ class Release
       await_gem(gem_path)
     end
 
-    #: (Hash[String, String | bool], String, Hash[String, String | bool]) -> void
+    #: (state, String, Hash[String, String | bool]) -> void
     def publish_github(state, notes_file, summary)
       create_release(state.fetch('version'), state.fetch('tag'), notes_file)
       summary['github'] = 'published'
@@ -337,7 +345,7 @@ class Release
       return nil if status == 404
       raise Error, "GitHub release lookup failed (HTTP #{status}): #{error.strip}" unless success && status == 200
 
-      JSON.parse(body)
+      JSON.parse(body.to_s)
     end
     private :matching_release?, :verify_candidate, :publication_status, :publish_gem, :publish_github,
             :save_publication, :github_release
@@ -352,7 +360,7 @@ class Release
     @directory = File.expand_path(directory)
   end
 
-  #: (String) -> Hash[String, String | bool]
+  #: (String) -> state
   def restore(directory)
     state = load_state(directory)
     git('fetch', File.expand_path(File.join(directory, 'source.bundle')),
@@ -377,7 +385,7 @@ class Release
     push_release(state)
   end
 
-  #: (Hash[String, String | bool]) -> String
+  #: (state) -> String
   def push_release(state)
     current = git('ls-remote', 'origin', 'refs/heads/main').split.first
     raise Error, 'main advanced during validation' unless current == state.fetch('captured_main')
@@ -398,7 +406,7 @@ class Release
           'Expected stable major.minor.patch version'
   end
 
-  #: (String) -> Hash[String, String | bool]
+  #: (String) -> state
   def load_state(directory)
     state = JSON.parse(File.read(File.join(directory, 'state.json')))
     validate_version(state.fetch('version'))
@@ -412,7 +420,7 @@ class Release
     state
   end
 
-  #: (Hash[String, String | bool]) -> void
+  #: (state) -> void
   def verify_source(state)
     raise Error, 'Release checkout mismatch' unless git('rev-parse', 'HEAD') == state.fetch('release_sha')
     raise Error, 'Release tag mismatch' unless git('rev-parse',
@@ -436,8 +444,8 @@ class Release
 
   #: (String) -> String
   def read_version(source)
-    version = source[/^\s*VERSION = ["']([^"']+)["']/, 1]
-    validate_version(version.to_s)
+    version = source[/^\s*VERSION = ["']([^"']+)["']/, 1].to_s
+    validate_version(version)
     version
   end
 
@@ -479,15 +487,18 @@ end
 if $PROGRAM_NAME == __FILE__
   begin
     release = Release.new
-    case ARGV.shift
-    when 'prepare' then release.prepare(*ARGV)
-    when 'restore' then release.restore(*ARGV)
-    when 'promote' then release.promote(*ARGV)
-    when 'publish' then release.publish(*ARGV)
-    when 'check-gem' then puts JSON.generate('published' => release.check_gem(*ARGV))
-    when 'check-release' then puts JSON.generate('published' => release.check_release(*ARGV))
-    when 'create-release' then release.create_release(*ARGV)
-    else raise Release::Error, 'Expected prepare, restore, promote, publish, check-gem, check-release or create-release'
+    case [ARGV.shift, ARGV]
+    in ['prepare', [version, directory]] then release.prepare(version, directory)
+    in ['restore', [directory]] then release.restore(directory)
+    in ['promote', [directory]] then release.promote(directory)
+    in ['publish', [directory, gem_path]] then release.publish(directory, gem_path)
+    in ['check-gem', [gem_path]] then puts JSON.generate('published' => release.check_gem(gem_path))
+    in ['check-release', [version, tag, notes]]
+      puts JSON.generate('published' => release.check_release(version, tag, notes))
+    in ['create-release', [version, tag, notes]] then release.create_release(version, tag, notes)
+    else
+      raise Release::Error,
+            'Expected prepare, restore, promote, publish, check-gem, check-release or create-release and its arguments'
     end
   rescue Release::Error => e
     warn e.message

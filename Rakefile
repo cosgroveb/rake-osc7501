@@ -21,8 +21,8 @@ end
 
 desc 'Check release/build style and runtime Ruby correctness'
 task :lint do
-  sh 'rubocop', 'script/release.rb', 'spec/release_spec.rb', 'Gemfile', 'Gemfile.compat',
-     'Gemfile.integration', 'Rakefile', 'rake-osc7501.gemspec'
+  sh 'rubocop', 'script/release.rb', 'spec/release_spec.rb', 'spec/tooling', 'Gemfile', 'Gemfile.compat',
+     'Gemfile.integration', 'Rakefile', 'Steepfile', 'rake-osc7501.gemspec'
   sh 'rubocop', '--only', 'Lint', 'lib', 'spec/rake', 'spec/support', 'spec/spec_helper.rb',
      'script/smoke.rb', 'script/check_types.rb'
 end
@@ -48,7 +48,7 @@ end
 
 task default: %i[quality spec smoke rdoc]
 
-desc 'Generate and validate inline RBS and check annotation coverage'
+desc 'Check runtime and tooling implementations against inline RBS'
 task :types do
   ruby 'script/check_types.rb'
 end

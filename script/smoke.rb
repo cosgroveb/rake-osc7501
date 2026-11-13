@@ -33,8 +33,9 @@ class InstalledSmoke
       @entrypoint = File.realpath(File.join(installed.full_gem_path, 'lib/rake/osc7501.rb'))
       check(directory, false, false)
       check(directory, true, false)
-      if @rspec_package
-        install(@rspec_package, directory)
+      rspec_package = @rspec_package
+      if rspec_package
+        install(rspec_package, directory)
         check(directory, false, true)
         check(directory, true, true)
       end
@@ -68,6 +69,7 @@ class InstalledSmoke
       source += "task(:default) { puts 'ordinary output'; #{failing ? 'fail "expected failure"' : 'true'} }"
     end
     File.write(File.join(directory, 'Rakefile'), source)
+    # @type var environment: Hash[String, String?]
     environment = { 'GEM_HOME' => directory, 'GEM_PATH' => directory, 'HOME' => directory,
                     'RUBYOPT' => nil, 'RUBYLIB' => nil, 'BUNDLE_GEMFILE' => nil, 'SPEC_OPTS' => nil,
                     'RAKE_OSC7501' => 'force', 'RSPEC_OSC7501' => 'force', 'RSPEC_OSC7501_ID' => nil }

@@ -8,7 +8,7 @@ require 'rbconfig'
 
 files = Dir['{lib,spec,script}/**/*.rb'] + Dir['Gemfile*'].reject do |f|
   f.end_with?('.lock')
-end + %w[Rakefile rake-osc7501.gemspec]
+end + %w[Rakefile Steepfile rake-osc7501.gemspec]
 methods = 0
 files.each do |path|
   source = File.read(path)
@@ -18,7 +18,7 @@ files.each do |path|
     next unless event == :on_kw && token == 'def'
 
     index = position.first - 2
-    comments = []
+    comments = [] #: Array[String]
     while index >= 0 && lines[index].lstrip.start_with?('#')
       comments.unshift(lines[index])
       index -= 1
@@ -37,5 +37,5 @@ files.each_with_index do |path, index|
   success = system('rbs-inline', '--base=.', "--output=tmp/signatures/#{index}", path)
   abort "Signature generation failed: #{path}" unless success
 end
-abort 'Signature validation failed' unless system('rbs', '-I', 'tmp/signatures', '-r', 'stringio', 'validate')
-puts "Validated inline RBS: #{files.size} files, #{methods} methods"
+abort 'Implementation type checking failed' unless system('steep', 'check', '-j', '2')
+puts "Validated inline RBS: #{files.size} files, #{methods} methods; checked runtime and tooling implementations"

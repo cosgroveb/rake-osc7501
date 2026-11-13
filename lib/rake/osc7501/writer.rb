@@ -37,7 +37,7 @@ module Rake
 
       #: (String, Integer) -> String
       def encode(text, byte_limit)
-        input = text.to_s.byteslice(0, sanitization_byte_limit(byte_limit))
+        input = text.to_s.byteslice(0, sanitization_byte_limit(byte_limit)) #: String
         clean = input.encode('UTF-8', invalid: :replace, undef: :replace).gsub(/[\u0000-\u001F\u007F-\u009F]/, '')
         bytes = 0
         bounded = clean.each_char.take_while do |char|
