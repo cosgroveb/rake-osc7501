@@ -8,7 +8,23 @@ module Rake
   #   end
 
   module OSC7501
-    # @rbs module-self ::Rake::_Application
+    # @rbs!
+    #   interface _Application
+    #     def options: () -> _Options
+    #     def top_level: () -> Object
+    #   end
+    #   interface _Options
+    #     def show_tasks: () -> (:tasks | :describe | :lines)?
+    #     def show_prereqs: () -> bool
+    #     def dryrun: () -> bool
+    #   end
+    #   interface _Task
+    #     def name: () -> String
+    #     def application: () -> ::Rake::Application
+    #     def execute: (?Object) ?{ (*Object) -> Object } -> Object
+    #   end
+
+    # @rbs module-self _Application
     module ApplicationHook
       attr_reader :osc7501_run #: Run?
 
@@ -27,7 +43,7 @@ module Rake
       end
     end
 
-    # @rbs module-self ::Rake::Task
+    # @rbs module-self _Task
     module TaskHook
       #: (?Object args) ?{ (*Object) -> Object } -> Object
       def execute(args = nil, &block)

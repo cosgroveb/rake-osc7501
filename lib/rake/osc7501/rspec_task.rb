@@ -5,8 +5,16 @@ require 'shellwords'
 
 module Rake
   module OSC7501
+    # @rbs!
+    #   interface _RSpecRakeTask
+    #     def run_task: (bool) -> Object
+    #     def ruby_opts: () -> (String | Array[String] | nil)
+    #     def rspec_path: () -> String
+    #     def system: (*String | Hash[String, String?] | Hash[Symbol, bool]) -> bool?
+    #   end
+
     # Wrap only the standard RSpec task's launch; keep its status handling intact.
-    # @rbs module-self ::RSpec::Core::RakeTask
+    # @rbs module-self _RSpecRakeTask
     module RSpecTask
       # @rbs @osc7501_context: [String, String]?
 

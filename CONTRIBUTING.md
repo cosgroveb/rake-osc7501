@@ -48,7 +48,9 @@ bundle exec rake rdoc
 ```
 
 The package is `pkg/rake-osc7501-<version>.gem`. Open `tmp/rdoc/index.html` to check
-rendered documentation. Keep generated files out of commits.
+rendered documentation. `rake package` generates runtime RBS from `lib/` into
+`pkg/rake-osc7501-<version>/sig/` and includes it in the gem for type tools to
+discover by gem name. Keep generated files out of commits.
 The smoke task builds and installs the gem in a temporary directory, then checks
 passing and failing tasks without loading the checkout's library.
 The `pure-rake` CI job runs this check with only Rake and the built gem installed
@@ -73,6 +75,8 @@ bundle exec ruby script/smoke.rb rake-osc7501-*.gem
 
 Remove `Gemfile.compat.lock` before changing RSpec versions. Keep it out of commits.
 The compatibility bundle pins diff-lcs 1.3 so test dependencies install on Ruby 2.1.
+These bare `gem build` checks omit generated signatures and need no type tooling.
+Use the modern development bundle and `rake package` for distribution builds.
 CI checks the oldest Ruby against both RSpec endpoints, the oldest RSpec on modern
 Ruby, and the Debian Bullseye and Bookworm version families. These jobs run the
 runtime suite and installed-gem smoke checks. Modern jobs also test release

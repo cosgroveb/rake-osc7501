@@ -7,9 +7,19 @@ require 'rspec/core/rake_task'
 require_relative 'lib/rake/osc7501'
 
 RSpec::Core::RakeTask.new(:spec)
-Gem::PackageTask.new(Gem::Specification.load('rake-osc7501.gemspec')) do |task|
+specification = Gem::Specification.load('rake-osc7501.gemspec')
+Gem::PackageTask.new(specification) do |task|
   task.package_dir = 'pkg'
 end
+
+task :package_signatures do
+  directory = "pkg/#{specification.full_name}"
+  FileUtils.rm_rf("#{directory}/sig")
+  sh 'rbs-inline', '--base=lib', "--output=#{directory}/sig", 'lib'
+  specification.files += Dir["#{directory}/sig/**/*.rbs"].map { |path| path.sub("#{directory}/", '') }
+end
+Rake::Task["pkg/#{specification.full_name}.gem"].enhance([:package_signatures])
+
 unless ENV.fetch('BUNDLE_GEMFILE', '').end_with?('Gemfile.compat')
   RDoc::Task.new do |task|
     task.main = 'README.md'
