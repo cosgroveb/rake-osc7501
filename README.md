@@ -59,6 +59,6 @@ verified live Rex presentation.
 
 ## Compatibility and development
 
-Runtime targets MRI Ruby >= 2.1 and Rake >= 12.3.3, with an optional adapter
-for RSpec >= 3.6. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checks,
-release setup and compatibility instructions.
+Runtime targets MRI Ruby >= 2.1 and Rake >= 12.3.3. The optional RSpec task
+integration targets RSpec >= 3.6. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+the full checks, release setup and compatibility instructions.
