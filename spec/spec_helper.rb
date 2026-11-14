@@ -14,6 +14,11 @@ module FrameHelpers
       end.to_h
     end
   end
+
+  #: (String) -> Array[String]
+  def titles(output)
+    output.scan(/\e\]2;([^\e]*)\e\\/).map { |(title)| title.force_encoding('UTF-8') }
+  end
 end
 
 RSpec.configure do |config|

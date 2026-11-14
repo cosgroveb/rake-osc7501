@@ -45,6 +45,15 @@ RSpec.describe 'Rake reporting' do
     expect(frames(output).map { |r| r['msg'] }).to include('sample.out')
   end
 
+  it 'titles the terminal with the running task and returns it to rake' do
+    source = "require 'rake/osc7501'; task(:default) { puts 'OK' }"
+    output, error, status = RakeSuite.run(source)
+    expect(status.success?).to eq(true), error
+    expect(titles(output)).to eq(['rake', 'rake › default', 'rake', 'rake'])
+    expect(output).to include("OK\n")
+    expect(frames(output).last['state']).to eq('done')
+  end
+
   ['-T', '-P', '-n', '-D', '-W', '-V'].each do |flag|
     it "does not report inspection #{flag}" do
       output, error, status = RakeSuite.run("require 'rake/osc7501'; desc 'work'; task(:default) {}", [flag])
