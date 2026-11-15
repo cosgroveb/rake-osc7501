@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-11-15
+
+- Shorten README and fix prose findings \(\#14\) ([18e54ef](https://github.com/cosgroveb/rake-osc7501/commit/18e54efd71e8aff4858ba8850d86d7bd29c6e19a))
+- Drop require-order detail from README \(\#15\) ([ea39746](https://github.com/cosgroveb/rake-osc7501/commit/ea39746bd9ace01f1b1b2a73f6467c0c11b3ae48))
+- Name the RSpec integration in the README \(\#16\) ([fb8672d](https://github.com/cosgroveb/rake-osc7501/commit/fb8672de8bf5a83238bb82fcc29db6d59a8b46f5))
+- Show current Rake task in terminal title \(\#17\) ([0780ec3](https://github.com/cosgroveb/rake-osc7501/commit/0780ec313ac46ce919769e3a02633f8ad360b54a))
+- Add version policy and release mechanics to AGENTS.md \(\#18\) ([4087500](https://github.com/cosgroveb/rake-osc7501/commit/4087500d90190fa872a412e8dc7886cf45547bce))
+
 ## 0.1.2 - 2026-11-13
 
 - Enable OSC reporting for direct RSpec runs ([ac72e7d](https://github.com/cosgroveb/rake-osc7501/commit/ac72e7db42be722561b4673f3de3ecb1ef2f9422))
