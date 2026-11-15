@@ -87,14 +87,15 @@ module Rake
       def report_active
         return if @finished
 
-        message = if @active.empty?
-                    'Running tasks'
-                  elsif @active.length == 1
-                    @active.first.name
-                  else
-                    "#{@active.length} active tasks"
-                  end
-        @writer.emit(state: 'working', msg: message)
+        if @active.empty?
+          @writer.emit(state: 'working', msg: 'Running tasks')
+        elsif @active.length == 1
+          message = @active.first.name
+          @writer.emit(state: 'working', msg: message, window_title: message)
+        else
+          message = "#{@active.length} active tasks"
+          @writer.emit(state: 'working', msg: message, window_title: message)
+        end
       end
     end
   end

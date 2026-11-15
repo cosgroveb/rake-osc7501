@@ -19,6 +19,11 @@ Run `bundle exec rake`. A supporting terminal receives the run as its root
 record with task activity and the outcome. Each new run replaces it, and
 ordinary command output continues.
 
+Reporting also sets the terminal title. While one task executes, the title is
+`rake › <task>`. While several tasks run in parallel, it is
+`rake › <n> active tasks`. The title returns to `rake` after the last task,
+on completion, and on error or stop.
+
 ## RSpec tasks
 
 For managed child reporting, add `rspec-osc7501` 0.1.4 or newer and use the
@@ -51,11 +56,12 @@ selection.
 
 Normal completion reports `done`. Exceptions and nonzero `SystemExit` report
 `error`, and `Interrupt` or early successful `SystemExit` report `idle`. The
-gem leaves Rake's scheduling, exceptions and exit behavior intact. Frames stay
-below 4096 bytes, and the gem sanitizes messages, caps them at 2048 decoded
-bytes, installs no process-wide exit or signal hooks, and reads no terminal
-input. Terminals control display, dismissal and notifications. We have not
-verified live Rex presentation.
+gem leaves Rake's scheduling, exceptions and exit behavior intact. Frames
+stay below 4096 bytes. The gem sanitizes messages and titles, resolves
+invalid UTF-8 by replacement, caps messages at 2048 decoded bytes and titles
+at 512 bytes including the `rake › ` prefix. It installs no process-wide exit
+or signal hooks and reads no terminal input. Terminals control display,
+dismissal and notifications. We have not verified live Rex presentation.
 
 ## Compatibility and development
 
