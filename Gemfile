@@ -13,11 +13,8 @@ gem 'rbs-inline', '0.14.0', require: false
 gem 'rdoc'
 gem 'rspec', ENV.fetch('RSPEC_VERSION', "~> #{rspec_minor}.0")
 gem 'rspec-core', ENV.fetch('RSPEC_CORE_VERSION', "~> #{rspec_minor}.0")
-if ENV['RSPEC_OSC7501_PATH']
-  gem 'rspec-osc7501', path: ENV['RSPEC_OSC7501_PATH']
-else
-  gem 'rspec-osc7501', '>= 0.1.4'
-end
+# Gemfile.integration substitutes a local checkout.
+gem 'rspec-osc7501', '>= 0.1.4' unless ENV['RSPEC_OSC7501_PATH']
 gem 'rubocop', '~> 1.92'
 gem 'rubocop-rspec', '~> 3.10'
 gem 'steep', '2.1.0', require: false
