@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 # rbs_inline: enabled
 
-# Kept for existing development commands and release workflows.
+# Dependabot rejects interpolated path dependencies, so they stay out of Gemfile.
 eval_gemfile 'Gemfile'
+gem 'rspec-osc7501', path: ENV.fetch('RSPEC_OSC7501_PATH')
