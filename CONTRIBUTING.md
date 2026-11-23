@@ -36,8 +36,8 @@ defined order because their interrupt and fail-fast cases depend on sequence.
 
 Keep runtime dependencies limited to `rake`. Cover task lifecycle behavior with real Rake subprocesses.
 The normal development bundle includes `rspec-osc7501`, so `bundle exec rake spec`
-also checks paired reporting. Set `RSPEC_OSC7501_PATH` before `bundle install` to
-use a local companion checkout.
+also checks paired reporting. To use a local companion checkout, set
+`RSPEC_OSC7501_PATH` and `BUNDLE_GEMFILE=Gemfile.integration` before `bundle install`.
 
 Build the gem and documentation:
 
