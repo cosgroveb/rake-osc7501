@@ -97,14 +97,14 @@ jobs:
           name: ${{ inputs.release-artifact }}
           path: ${{ runner.temp }}/release
       - if: inputs.release-artifact != ''
-        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+        uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1
         with:
           ruby-version: "3.4"
           bundler: none
           bundler-cache: false
       - if: inputs.release-artifact != ''
         run: ruby script/release.rb restore "$RUNNER_TEMP/release"
-      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+      - uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: ${{ matrix.bundler || 'default' }}
@@ -140,7 +140,7 @@ jobs:
         with:
           name: ${{ inputs.release-artifact }}
           path: ${{ runner.temp }}/release
-      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+      - uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1
         with:
           ruby-version: "3.4"
           bundler: none
@@ -178,7 +178,7 @@ jobs:
         with:
           name: ${{ inputs.release-artifact }}
           path: ${{ runner.temp }}/release
-      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+      - uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1
         with:
           ruby-version: "3.4"
           bundler: none
@@ -190,7 +190,7 @@ jobs:
           gem specification "$RUNNER_TEMP/rspec-osc7501-0.1.4.gem" --ruby > "$RSPEC_OSC7501_PATH/rspec-osc7501.gemspec"
       - if: inputs.release-artifact != ''
         run: ruby script/release.rb restore "$RUNNER_TEMP/release"
-      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
+      - uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: ${{ matrix.bundler }}
